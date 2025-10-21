@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>تفاصيل الفعالية</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="index.html">
+        <img src="assets/img/logo.png" alt="Logo" class="me-2" style="height:40px;">
+        <span class="fw-bold">دليل فعاليات المدينة</span>
+      </a>
+    </div>
+  </nav>
+
+  <main class="container py-4">
+    <div id="eventDetail" class="card p-3">
+      <!-- سيتم ملؤه بواسطة JS -->
+    </div>
+
+    <h5 class="mt-4">فعاليات ذات صلة</h5>
+    <div id="related" class="row g-3 mt-2"></div>
+  </main>
+
+  <footer class="bg-dark text-light py-4 mt-5">
+    <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center">
+      <div>© دليل فعاليات المدينة</div>
+      <div class="small">تواصل: info@cityevents.example</div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script>
+    // استخرج id من query string
+    function getQueryParam(name){
+      const params = new URLSearchParams(location.search);
+      return params.get(name);
+    }
+
+    document.addEventListener('DOMContentLoaded', ()=>{
+      const id = parseInt(getQueryParam('id'),10) || null;
+      const event = (window.eventsData || []).find(e => e.id === id) || null;
+      const detail = document.getElementById('eventDetail');
+      if(!event){
+        detail.innerHTML = '<div class="alert alert-warning">الفعالية غير موجودة.</div>';
+        return;
+      }
+      detail.innerHTML = `
+        <div class="row g-3">
+          <div class="col-md-6">
+            <img src="${event.img}" alt="${event.title}" class="img-fluid rounded">
+            <div class="mt-2">
+              <button class="btn btn-outline-primary btn-sm" onclick="navigator.share?.({title: '${event.title}', text: '${event.short}', url: location.href})">مشاركة</button>
+              <a class="btn btn-primary btn-sm" href="#">أضف للتقويم</a>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <h3>${event.title}</h3>
+            <p class="text-muted">${event.date} — ${event.place}</p>
+            <p>${event.short} (وصف تفصيلي يمكن توسيعه هنا)</p>
+          </div>
+        </div>
+      `;
+
+      // فعاليات ذات صلة: نفس الفئة
+      const related = (window.eventsData || []).filter(e => e.category === event.category && e.id !== event.id);
+      const relDiv = document.getElementById('related');
+      related.forEach(e=>{
+        const col = document.createElement('div');
+        col.className = 'col-12 col-sm-6 col-lg-4';
+        col.innerHTML = `
+          <div class="card">
+            <img src="${e.img}" class="card-img-top" style="height:140px;object-fit:cover;">
+            <div class="card-body">
+              <h6 class="card-title">${e.title}</h6>
+              <p class="small text-muted">${e.date} — ${e.place}</p>
+              <a href="event.html?id=${e.id}" class="btn btn-sm btn-outline-primary">عرض</a>
+            </div>
+          </div>
+        `;
+        relDiv.appendChild(col);
+      });
+    });
+  </script>
+</body>
+</html>
